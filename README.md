@@ -1,6 +1,6 @@
 # Merlin
 
-An experimental Modding API for Kingdom and Castle
+An experimental Modding API for Kingdoms and Castles
 
 Limited functionality at the moment, looking for contributors !
 
