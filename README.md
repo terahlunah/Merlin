@@ -9,13 +9,14 @@ Limited functionality at the moment, looking for contributors !
 (You can find a detailled install guide in the downloaded zip file)
 
 To install Merlin :
-- Download the [lastest version](https://github.com/terahxluna/Merlin/releases/download/v0.1/Merlin_v0.1.zip) (Contains the NoFog mod)
+- Download the [lastest version](https://github.com/terahxluna/Merlin/releases)
 - Unzip it
 - Launch MerlinPatcher
 - Find the K&C root folder
 - Patch it !
 
 To install mods :
+- You can find my mod pack here : [TerahModPack](https://github.com/terahxluna/TerahModPack)
 - Copy the mod .dll file to the "Mods" folder inside K&C root folder
 
 ## Creating Mods and Contributing
