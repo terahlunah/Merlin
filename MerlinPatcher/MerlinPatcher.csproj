@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{118DA810-B3FA-4E47-9482-1D0896E0D421}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>MerlinPatcher</RootNamespace>
     <AssemblyName>MerlinPatcher</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
@@ -77,6 +77,12 @@
     <EmbeddedResource Include="PatcherForm.resx">
       <DependentUpon>PatcherForm.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Merlin\Merlin.csproj">
+      <Project>{b0fe69d3-4aa1-40e6-a3bb-77d5e634958d}</Project>
+      <Name>Merlin</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

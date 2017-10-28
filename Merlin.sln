@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerlinPatcher", "MerlinPatc
 		{B0FE69D3-4AA1-40E6-A3BB-77D5E634958D} = {B0FE69D3-4AA1-40E6-A3BB-77D5E634958D}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoFog", "NoFog\NoFog.csproj", "{B9497DD8-1ED7-4BBA-A531-B5758BD8496E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,10 +24,6 @@ Global
 		{118DA810-B3FA-4E47-9482-1D0896E0D421}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{118DA810-B3FA-4E47-9482-1D0896E0D421}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{118DA810-B3FA-4E47-9482-1D0896E0D421}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9497DD8-1ED7-4BBA-A531-B5758BD8496E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9497DD8-1ED7-4BBA-A531-B5758BD8496E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9497DD8-1ED7-4BBA-A531-B5758BD8496E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9497DD8-1ED7-4BBA-A531-B5758BD8496E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

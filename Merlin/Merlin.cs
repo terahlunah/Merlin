@@ -12,10 +12,6 @@ namespace Merlin
     {
         public static List<MerlinMod> Mods = new List<MerlinMod>();
 
-
-        public static Weather Weather { get; set; }
-
-
         public static void LoadMods()
         {
             string modsPath = GetModsPath();
@@ -55,8 +51,8 @@ namespace Merlin
             var assembly = Assembly.LoadFrom(path);
             foreach (var type in FindModTypes(assembly))
             {
-                var gob = new GameObject().AddComponent(type);
-                var mod = gob.GetComponent<MerlinMod>();
+                var mod = Activator.CreateInstance(type) as MerlinMod;
+                mod.OnLoad();
                 Mods.Add(mod);
             }
         }
@@ -69,6 +65,16 @@ namespace Merlin
         public static void Dispatch(Action<MerlinMod> action)
         {
             Mods.ForEach(action);
+        }
+
+        public static object GetField<T>(string field, object instance = null)
+        {
+            return typeof(T).GetField(field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).GetValue(instance);
+        }
+
+        public static void SetField<T>(object value, string field, object instance = null)
+        {
+            typeof(T).GetField(field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).SetValue(instance, value);
         }
     }
 }

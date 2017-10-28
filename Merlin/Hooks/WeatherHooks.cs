@@ -8,10 +8,6 @@ namespace Merlin.Hooks
 {
     public static class WeatherHooks
     {
-        [Hook("ForwardSelf", "", "Weather", "Start")]
-        public static void OnWeatherStart(Weather weather)
-        {
-            Merlin.Weather = weather;
-        }
+
     }
 }

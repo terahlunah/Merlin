@@ -56,23 +56,7 @@ namespace MerlinPatcher
 
         private void patchButton_Click(object sender, EventArgs e)
         {
-            var backupPath = targetPath + ".bak";
-
-            if(File.Exists(backupPath))
-            {
-                File.Delete(targetPath);
-                File.Copy(backupPath, targetPath);
-            }
-            else
-            {
-                File.Copy(targetPath, backupPath);
-            }
-
-            if(MerlinPatcher.Patch(targetPath, "Merlin.dll"))
-            {
-                File.Delete(targetPath);
-                File.Move(targetPath + ".patched", targetPath);
-            }
+            MerlinPatcher.Patch(targetPath, "Merlin.dll");
         }
     }
 }

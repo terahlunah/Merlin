@@ -3,7 +3,7 @@
 namespace Merlin.Hooks
 {
     [AttributeUsage(AttributeTargets.Method)]
-    class Hook : Attribute
+    public class Hook : Attribute
     {
         public Hook(string Type, string Namespace, string Class, string Method)
         {

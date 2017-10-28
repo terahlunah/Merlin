@@ -39,6 +39,17 @@ namespace MerlinPatcher
 
         public static bool Patch(string targetAssemblyPath, string hookAssemblyPath)
         {
+            var backupPath = targetAssemblyPath + ".bak";
+            if (File.Exists(backupPath))
+            {
+                File.Delete(targetAssemblyPath);
+                File.Copy(backupPath, targetAssemblyPath);
+            }
+            else
+            {
+                File.Copy(targetAssemblyPath, backupPath);
+            }
+
             AssemblyDefinition targetAssembly = AssemblyDefinition.ReadAssembly(targetAssemblyPath);
             AssemblyDefinition hookAssembly = AssemblyDefinition.ReadAssembly(hookAssemblyPath);
 
@@ -49,6 +60,8 @@ namespace MerlinPatcher
                 var managedPath = Path.GetDirectoryName(targetAssemblyPath);
 
                 targetAssembly.Write(targetAssemblyPath + ".patched");
+                File.Delete(targetAssemblyPath);
+                File.Move(targetAssemblyPath + ".patched", targetAssemblyPath);
 
                 var merlinTarget = Path.Combine(managedPath + "/Merlin.dll");
                 File.Copy(hookAssemblyPath, merlinTarget, true);
@@ -59,7 +72,7 @@ namespace MerlinPatcher
 
         static bool PatchAssembly(AssemblyDefinition targetAssembly, AssemblyDefinition hookAssembly)
         {
-            List<Hook> hooks = GetHookList(hookAssembly);
+            List<HookData> hooks = GetHookList(hookAssembly);
 
             foreach (var hook in hooks)
             {
@@ -79,7 +92,7 @@ namespace MerlinPatcher
             return true;
         }
 
-        static MethodDefinition FindTargetHook(AssemblyDefinition targetAssembly, Hook hook)
+        static MethodDefinition FindTargetHook(AssemblyDefinition targetAssembly, HookData hook)
         {
             foreach (var module in targetAssembly.Modules)
             {
@@ -99,9 +112,9 @@ namespace MerlinPatcher
             return null;
         }
 
-        static List<Hook> GetHookList(AssemblyDefinition hookAssembly)
+        static List<HookData> GetHookList(AssemblyDefinition hookAssembly)
         {
-            List<Hook> hooks = new List<Hook>();
+            List<HookData> hooks = new List<HookData>();
 
             foreach (var module in hookAssembly.Modules)
             {
@@ -109,7 +122,7 @@ namespace MerlinPatcher
                 {
                     foreach (var method in type.Methods)
                     {
-                        Hook hook = GetHookAttribute(method);
+                        HookData hook = GetHookAttribute(method);
                         if (hook != null)
                             hooks.Add(hook);
                     }
@@ -119,13 +132,13 @@ namespace MerlinPatcher
             return hooks;
         }
 
-        static Hook GetHookAttribute(MethodDefinition method)
+        static HookData GetHookAttribute(MethodDefinition method)
         {
             foreach (var attribute in method.CustomAttributes)
             {
                 if (attribute.AttributeType.Name == "Hook")
                 {
-                    return new Hook
+                    return new HookData
                     {
                         Virus = method,
                         Type = attribute.ConstructorArguments[0].Value as string,
@@ -139,15 +152,21 @@ namespace MerlinPatcher
             return null;
         }
 
-        static void InstallHook(Hook hook)
+        static void InstallHook(HookData hook)
         {
             Console.WriteLine(hook.Host.FullName + " => " + hook.Virus.FullName);
 
             switch (hook.Type)
             {
-                case "ForwardSelf":
+                case "Before":
                 {
-                    InstallForwardHook(hook);
+                    InstallHookBefore(hook);
+                    break;
+                }
+
+                case "After":
+                {
+                    InstallHookAfter(hook);
                     break;
                 }
 
@@ -159,13 +178,128 @@ namespace MerlinPatcher
             }
         }
 
-        static void InstallForwardHook(Hook hook)
+        static void InstallHookBefore(HookData hook)
         {
+            if (!CheckSignatureCompatibility(hook.Host, hook.Virus, false))
+            {
+                Console.WriteLine("Error : Method signature difference between Hook and Target");
+                return;
+            }
+
+            if (hook.Virus.ReturnType.FullName != "System.Void")
+            {
+                Console.WriteLine("Error : Hook must return void");
+                return;
+            }
+            
+            foreach (var arg in hook.Host.Parameters)
+            {
+                Console.WriteLine(arg.Name + " : " + arg.ParameterType);
+            }
+            foreach (var arg in hook.Virus.Parameters)
+            {
+                Console.WriteLine(arg.Name + " : " + arg.ParameterType);
+            }
+
             var ilp = hook.Host.Body.GetILProcessor();
             var first = hook.Host.Body.Instructions[0];
 
-            ilp.InsertBefore(first, ilp.Create(OpCodes.Ldarg_0));
+            if (hook.Host.HasThis && !hook.Host.ExplicitThis)
+                ilp.InsertBefore(first, ilp.Create(OpCodes.Ldarg_0));
+
+            foreach (var param in hook.Host.Parameters)
+                ilp.InsertBefore(first, ilp.Create(OpCodes.Ldarg, param));
+
             ilp.InsertBefore(first, ilp.Create(OpCodes.Call, hook.Host.Module.Import(hook.Virus)));
+        }
+
+        static void InstallHookAfter(HookData hook)
+        {
+            if (!CheckSignatureCompatibility(hook.Host, hook.Virus, true))
+            {
+                Console.WriteLine("Error : Method signature difference between Hook and Target");
+                return;
+            }
+
+            foreach (var arg in hook.Host.Parameters)
+            {
+                Console.WriteLine(arg.Name + " : " + arg.ParameterType);
+            }
+            foreach (var arg in hook.Virus.Parameters)
+            {
+                Console.WriteLine(arg.Name + " : " + arg.ParameterType);
+            }
+
+            bool hasReturnType = hook.Host.ReturnType.FullName != "System.Void";
+
+
+            VariableDefinition returnVar = null;
+            if (hasReturnType)
+            {
+                returnVar = new VariableDefinition("returnVar", hook.Host.ReturnType);
+                hook.Host.Body.Variables.Add(returnVar);
+            }
+            
+
+            var ilp = hook.Host.Body.GetILProcessor();
+            var last = hook.Host.Body.Instructions[hook.Host.Body.Instructions.Count-1]; // Ret
+
+            // Store original return value
+            if (hasReturnType)
+                ilp.InsertBefore(last, ilp.Create(OpCodes.Stloc, returnVar));
+
+            // Add this parameter
+            if (hook.Host.HasThis && !hook.Host.ExplicitThis)
+                ilp.InsertBefore(last, ilp.Create(OpCodes.Ldarg_0));
+
+            // Add parameters
+            foreach (var param in hook.Host.Parameters)
+                ilp.InsertBefore(last, ilp.Create(OpCodes.Ldarg, param));
+
+            // Load original return value
+            if (hasReturnType)
+                ilp.InsertBefore(last, ilp.Create(OpCodes.Ldloc, returnVar));
+
+            ilp.InsertBefore(last, ilp.Create(OpCodes.Call, hook.Host.Module.Import(hook.Virus)));
+        }
+
+        private static List<TypeReference> GetParametersTypeList(MethodDefinition method, bool withReturnType)
+        {
+            List<TypeReference> typeList = new List<TypeReference>();
+
+            if (method.HasThis && !method.ExplicitThis)
+                typeList.Add(method.DeclaringType);
+
+            typeList.AddRange(method.Parameters.AsEnumerable().Select(param => param.ParameterType));
+
+            if (withReturnType)
+                typeList.Add(method.ReturnType);
+
+            return typeList;
+        }
+
+        private static bool CheckSignatureCompatibility(MethodDefinition a, MethodDefinition b, bool withReturnType = false)
+        {
+            var typeListA = GetParametersTypeList(a, withReturnType);
+            var typeListB = GetParametersTypeList(b, withReturnType);
+            
+            if (!withReturnType && typeListA.Count != typeListB.Count)
+                return false;
+
+            if (withReturnType && a.ReturnType.FullName != "System.Void" && typeListA.Count + 1 != typeListB.Count)
+                return false;
+
+            for (var i = 0; i < typeListA.Count; ++i)
+            {
+                if (typeListA[i].FullName != typeListB[i].FullName)
+                    return false;
+            }
+
+            if (withReturnType && a.ReturnType.FullName != "System.Void")
+                if (a.ReturnType.FullName != typeListB[typeListB.Count - 1].FullName)
+                    return false;
+
+            return true;
         }
     }
 }

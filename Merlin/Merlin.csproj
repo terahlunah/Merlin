@@ -44,8 +44,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\WeatherExtensions.cs" />
     <Compile Include="Hooks\Hook.cs" />
     <Compile Include="Hooks\MainHooks.cs" />
+    <Compile Include="Hooks\TerrainGen.cs" />
+    <Compile Include="Hooks\TreeGrowthHooks.cs" />
     <Compile Include="Hooks\WeatherHooks.cs" />
     <Compile Include="Hooks\WorldHooks.cs" />
     <Compile Include="MerlinMod.cs" />
