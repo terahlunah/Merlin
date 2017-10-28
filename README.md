@@ -31,7 +31,7 @@ To install mods :
     - (Optional, if you need it) UnityEngine.UI.dll
 - Create a public class inheriting MerlinMod (using Merlin;)
     - MerlinMod inherits MonoBehavior so you have access to MonoBehavior methods)
-    - Look at [NoFog](https://github.com/terahxluna/Merlin/blob/master/NoFog/NoFogMod.cs) for an example
+    - Look at [TerahModPack](https://github.com/terahxluna/TerahModPack) for examples
 - Just copy your dll in the "Mods" folder (in K&C root folder) and it will be loaded when the game starts
 
 ### Contributing to Merlin
