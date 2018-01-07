@@ -14,23 +14,55 @@ namespace Merlin
 
         public static void LoadMods()
         {
-            string modsPath = GetModsPath();
+            var listOfAllDlls = GetModFilesOf(GetModsPath());
 
-            foreach (var file in Directory.GetFiles(modsPath))
+            foreach(var modfile in listOfAllDlls)
+            {
+                LoadModFile(modfile);
+            }
+        }
+
+        private static List<string> GetModFilesOf(string path)
+        {
+            var list = new List<string>();
+
+            //all Files in Directory
+
+            foreach (var file in Directory.GetFiles(path))
             {
                 if (file.EndsWith(".dll"))
                 {
                     try
                     {
-                        LoadMod(file);
+                        list.Add(file);
                     }
                     catch (Exception e)
                     {
                         Debug.Log(e);
                     }
                 }
-                    
+
             }
+
+            //all Directories in Directory
+
+            foreach (var dir in Directory.GetDirectories(path))
+            {
+                try
+                {
+                    //recursion
+                    foreach(var file in GetModFilesOf(dir))
+                    {
+                        list.Add(file);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Debug.Log(e);
+                }
+            }
+
+            return list;
         }
 
         private static string GetModsPath()
@@ -46,7 +78,7 @@ namespace Merlin
             return modDir;
         }
 
-        private static void LoadMod(string path)
+        private static void LoadModFile(string path)
         {
             var assembly = Assembly.LoadFrom(path);
             foreach (var type in FindModTypes(assembly))
