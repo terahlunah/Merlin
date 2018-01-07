@@ -18,10 +18,11 @@ namespace Merlin.Extensions
 
         public static void DisableFog(this Weather weather)
         {
-            weather.fogSummer = new MinMax(100, 100);
-            weather.fogWinter = new MinMax(100, 100);
-            weather.fogMapSelect = new MinMax(100, 100);
-            weather.fogHeavyRain = new MinMax(100, 100);
+            weather.fogSummer = new MinMax(150, 150);
+            weather.fogWinter = new MinMax(150, 150);
+            weather.fogMapSelect = new MinMax(150, 150);
+            weather.fogNormalRain = new MinMax(150, 150);
+            weather.fogHeavyRain = new MinMax(150, 150);
         }
     }
 }
