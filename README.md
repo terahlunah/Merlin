@@ -1,4 +1,4 @@
-# Merlin
+# Merlin (Not maintained anymore)
 
 An experimental Modding API for Kingdoms and Castles
 
